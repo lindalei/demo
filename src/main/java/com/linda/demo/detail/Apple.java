@@ -1,6 +1,8 @@
 package com.linda.demo.detail;
 
-public class Apple extends  Fruit {
+import java.io.Serializable;
+
+public class Apple extends Fruit {
     private String color;
     private int weight;
 
