@@ -16,6 +16,7 @@ public class ConstructBiTree {
                break;
             }
         }
+
         return root;
     }
 

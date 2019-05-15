@@ -1,9 +1,6 @@
 package com.linda.demo.bullCode;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class FirstAppearingOnce {
 
 //    HashMap<Character, Integer> map=new HashMap();

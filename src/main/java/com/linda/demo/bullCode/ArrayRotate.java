@@ -1,7 +1,5 @@
 package com.linda.demo.bullCode;
 
-import java.util.ArrayList;
-
 public class ArrayRotate {
     public static int[] rotateArray(int start, int[] array) {
 
@@ -25,6 +23,8 @@ public class ArrayRotate {
         while (i >= leftNum && i < array.length) {
             rotateArray[i++] = rightArray[k++];
         }
+
+
         return rotateArray;
     }
 
