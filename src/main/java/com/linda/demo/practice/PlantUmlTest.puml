@@ -1,0 +1,122 @@
+@startuml
+
+小苗 -> 孤尽: 老师，请您传道授业
+孤尽 --> 小苗: 诲人不倦公益心，可以
+
+小苗 -> 孤尽: 辛苦您
+小苗 <-- 孤尽: 好好上课，按时交作业，多思考
+小苗 --> 孤尽: 记下了，好好学习，蟹蟹
+
+@enduml
+
+@startuml
+(*)  --> "check input"
+If "input is verbose" then (yes)
+--> [Yes] "turn on verbosity"
+--> "run command"
+else
+--> "run command"
+Endif
+-->(*)
+@enduml
+
+@startuml
+:"步骤1处理";
+:"步骤2处理";
+if ("条件1判断") then (true)
+    :条件1成立时执行的动作;
+    if ("分支条件2判断") then (no)
+        :"条件2不成立时执行的动作";
+    else
+        if ("条件3判断") then (yes)
+            :"条件3成立时的动作";
+        else (no)
+            :"条件3不成立时的动作";
+        endif
+    endif
+    :"顺序步骤3处理";
+endif
+
+if ("条件4判断") then (yes)
+:"条件4成立的动作";
+else
+    if ("条件5判断") then (yes)
+        :"条件5成立时的动作";
+    else (no)
+        :"条件5不成立时的动作";
+    endif
+endif
+stop
+@enduml
+
+
+@startuml
+:Main Admin: as Admin
+(Use the application) as Use
+
+User -> (Start)
+User --> (Use)
+
+Admin ---> (Use)
+
+note right of Admin : This is an example.
+
+note right of Use
+A note can also
+be on several lines
+end note
+
+note "This note is connected\nto several objects." as N2
+(Start) .. N2
+N2 .. (Use)
+@enduml
+
+@startuml
+:run;
+:finishCompletion;
+group 唤醒调用线程
+if (waiters!=null) then (yes)
+: LockSupport.unpark(waiter.thread);
+else (no)
+endif
+:done;
+@enduml
+
+@startuml
+:get();
+:awaitDone();
+ if(s > COMPLETING) then (yes)
+  if(q != null) then (yes)
+  :q.thread=null;
+   :s=state;
+  endif;
+
+ else (no)
+  if(s == COMPLETING) then (yes)
+  :Thread.yield();
+  else (no)
+   if(q==null) then (yes)
+    :q = new WaitNode();
+    :queue;
+    endif
+    :LockSupport.park;
+   endif
+ endif
+:report(s);
+@enduml
+
+@startuml
+:core包里主要是接口，只有一个factory的实现，具体生成什么类型的factory，在cp包里
+:MessagingServiceFactory
+createConnectionFactory方法（setting会传进去，用于设置failover url）
+调用MessageServiceJmsExtention的create方法
+
+MessageServiceJmsExtention的create方法调用init生成MessagingServiceJmsConnectionFactory
+基于httpheader中的access_token
+而access_token是JmsConnectionExtension中的headersExtension方法生成的（使用MessageService的client信息）;
+
+@enduml
+
+
+
+

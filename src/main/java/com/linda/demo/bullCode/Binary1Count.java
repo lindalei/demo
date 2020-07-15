@@ -1,6 +1,7 @@
 package com.linda.demo.bullCode;
 
 public class Binary1Count {
+    //二进制中1个个数
     public static int NumberOf1(int n) {
 //
 //      if(n<0){
@@ -38,6 +39,6 @@ public class Binary1Count {
 
     public static void main(String[] args) {
         //NumberOf1(-3);
-        System.out.println(NumberOf1(10));
+        System.out.println(NumberOf1(-10));
     }
 }

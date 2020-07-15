@@ -44,6 +44,7 @@ public class Jenkins {
   static String mdProUISheetName = "Process UI";
   static String mdRepUISheetName = "Repository UI";
   static String mdCommplianceUISheetName = "MD Comp Manage";
+  static int springNum = 50;
 
   public static void main(String[] args) throws URISyntaxException, IOException {
 
@@ -79,7 +80,7 @@ public class Jenkins {
           coverageMap = getBackendCoverage(jenkinsRootUrl, entry.getValue());
         }
 
-        writeExcel(workbook, entry.getKey(), 45, coverageMap);
+        writeExcel(workbook, entry.getKey(), springNum, coverageMap);
       }
 
       //write frontend coverage to excel sheet
@@ -105,13 +106,8 @@ public class Jenkins {
     WebElement buildNumber =
         driver.findElement(By.cssSelector("a[update-parent-class='.build-row']:first-of-type"));
     buildNumber.click();
-    try {
-      writeRegUICoverage(workbook, driver);
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+
+    writeRegUICoverage(workbook, driver);
 
     //get masterdata-ui coverage
     driver.get(mdUIUrl);
@@ -140,8 +136,7 @@ public class Jenkins {
   }
 
   // there are two repports in regulation-ui
-  public static void writeRegUICoverage(Workbook workbook, WebDriver driver)
-      throws IOException, InterruptedException {
+  public static void writeRegUICoverage(Workbook workbook, WebDriver driver) {
     String regComplianceUrl =
         "LCOV Coverage target-coverage-allComplianceManageTests-report-lcov-lcov-report";
     String regUIUrl = "LCOV Coverage target-coverage-allRegulationTests-report-lcov-lcov-report";
@@ -161,7 +156,7 @@ public class Jenkins {
       serviceUrl.click();
       Map<Integer, String> coverageMap = getModuleUICoverage(driver);
       try {
-        writeExcel(workbook, entry.getKey(), 45, coverageMap);
+        writeExcel(workbook, entry.getKey(), springNum, coverageMap);
       } catch (IOException e) {
         e.printStackTrace();
       }
