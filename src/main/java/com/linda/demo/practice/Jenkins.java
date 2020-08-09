@@ -44,7 +44,7 @@ public class Jenkins {
   static String mdProUISheetName = "Process UI";
   static String mdRepUISheetName = "Repository UI";
   static String mdCommplianceUISheetName = "MD Comp Manage";
-  static int springNum = 50;
+  static int springNum = 52;
 
   public static void main(String[] args) throws URISyntaxException, IOException {
 
@@ -84,7 +84,7 @@ public class Jenkins {
       }
 
       //write frontend coverage to excel sheet
-      writeFrontendCoverage(workbook);
+      //writeFrontendCoverage(workbook);
 
       workbook.write(outputStream);
       inputStream.close();

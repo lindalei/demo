@@ -10,8 +10,12 @@ public class OddTest {
 
     }
     public static void main(String[] args){
+        System.currentTimeMillis();
         long a= System.currentTimeMillis();
-        System.out.println(isOdd(-3));
+        //System.out.println(isOdd(-3));
+        System.out.println(123);
+        System.out.println(456);
+        System.out.println(789);
         System.out.println(System.currentTimeMillis()-a);
 
     }
