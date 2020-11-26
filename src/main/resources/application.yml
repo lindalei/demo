@@ -10,4 +10,10 @@ spring:
     show-sql: true
 server:
   port: 8080
+  #是否将自己注册到Eureka-Server中，默认的为true
+eureka:
+  client:
+  registerWithEureka: false
+  #是否从Eureka-Server中获取服务注册信息，默认为true
+  fetchRegistry: false
 

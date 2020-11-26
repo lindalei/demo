@@ -6,11 +6,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+//@Configuration
+
 @SpringBootApplication
 //@ComponentScan(basePackages = "com.linda.demo.detail")
-@EnableAutoConfiguration
-@ComponentScan
+//@EnableAutoConfiguration
+//@ComponentScan
 
 //@EnableJpaRepositories(basePackages = "com.linda.demo.detail.Repo")
 public class DemoApplication {
