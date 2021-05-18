@@ -1,7 +1,6 @@
 package com.linda.demo.practice;
 
 import com.offbytwo.jenkins.JenkinsServer;
-import com.offbytwo.jenkins.model.Build;
 import com.offbytwo.jenkins.model.JacocoCoverageReport;
 import com.offbytwo.jenkins.model.JobWithDetails;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -25,8 +24,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 public class Jenkins {
   static String jenkinsRootUrl =
@@ -38,15 +39,20 @@ public class Jenkins {
   static String MDBackendSheetName = "MD Backend";
   static String regBackendSheetName = "Regulation Service";
   static String docLibBackendSheetName = "Document-Service-Lib";
+  static String mdClientLibBackendSheetName = "Masterdata-Client";
   static String regUISheetName = "Regulation UI";
   static String regComplianceUISheetName = "Regulation Compliance Manage";
   static String mdOrgUISheetName = "Organization UI";
   static String mdProUISheetName = "Process UI";
   static String mdRepUISheetName = "Repository UI";
   static String mdCommplianceUISheetName = "MD Comp Manage";
-  static int springNum = 61;
+  static int springNum = 75;
+  static Set<String> libSet = new HashSet<String>() {{
+    add(docLibBackendSheetName);
+    add(mdClientLibBackendSheetName);
+  }};
 
-  public static void main(String[] args) throws URISyntaxException, IOException {
+  public static void main(String[] args) throws IOException {
 
     String excelFilePath = "C:\\repo\\coverage\\Coverage.xlsx";
     FileInputStream inputStream;
@@ -60,31 +66,41 @@ public class Jenkins {
       /**
        * write backend coverage to excel sheet
        * Prerequisite
-       * we need import certificate of jenkins server to our jre environment.
+       * we need to import certificate of jenkins server to our jre environment.
        * 1. download certificate form jenkins server
        * 2. copy downloaded certificate to "C:\Program Files\Java\jdk1.8.0_211\jre\lib\security",
        * where your jre locates.
-       * 3. run command in administrator mode to import certificate to jre:
+       * 3. run command in administrator mode to import certificate to jre: (default password is
+       * "changeit")
        * keytool -import -alias jenkins_certificate -keystore cacerts -file jenkins_certificate.cer
        * 4. check whether certificate imported to jre successfully or not
        * keytool -list -keystore cacerts -alias jenkins_certificate
        */
+      //Build mapping between sheet name and jenkins url
       Map<String, String> backendMap = buildBackendMap();
+
       Iterator<Map.Entry<String, String>> entries = backendMap.entrySet().iterator();
       while (entries.hasNext()) {
         Map.Entry<String, String> entry = entries.next();
+
+        // Calculate coverage data
         Map<Integer, String> coverageMap;
-        if (entry.getKey().equals(docLibBackendSheetName)) {
+        // for jenkins "GRC-Library/" projects: https://gkejen4ctrlframwork.jaas-gcp.cloud.sap
+        // .corp/job/GRC-Library/
+        if (libSet.contains(entry.getKey())) {
           coverageMap = getBackendCoverage(jenkinsLibUrl, entry.getValue());
-        } else {
+        } //for jenkins "GRC-DPP" projects: https://gkejen4ctrlframwork.jaas-gcp.cloud.sap
+        // .corp/job/GRC-DPP
+        else {
           coverageMap = getBackendCoverage(jenkinsRootUrl, entry.getValue());
         }
 
+        // Write coverage data to excel
         writeExcel(workbook, entry.getKey(), springNum, coverageMap);
       }
 
       //write frontend coverage to excel sheet
-      //writeFrontendCoverage(workbook);
+      writeFrontendCoverage(workbook);
 
       workbook.write(outputStream);
       inputStream.close();
@@ -95,9 +111,9 @@ public class Jenkins {
     }
   }
 
-  private static void writeFrontendCoverage(Workbook workbook) {
+  public static void writeFrontendCoverage(Workbook workbook) {
     System.setProperty("webdriver.chrome.driver",
-        "C://Users//I308725//Downloads//chromedriver_win32_80//chromedriver.exe");
+        "C://Users//I308725//Downloads//chromedriver_win32_86//chromedriver.exe");
 
     WebDriver driver = new ChromeDriver();
     driver.manage().window().maximize();
@@ -152,14 +168,10 @@ public class Jenkins {
     while (entries.hasNext()) {
       Map.Entry<String, String> entry = entries.next();
       WebElement serviceUrl =
-          driver.findElement(By.xpath("//a[text()='" + entry.getValue() + "']"));
+          driver.findElement(By.xpath("//a//span[text()='" + entry.getValue() + "']"));
       serviceUrl.click();
       Map<Integer, String> coverageMap = getModuleUICoverage(driver);
-      try {
-        writeExcel(workbook, entry.getKey(), springNum, coverageMap);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      writeExcel(workbook, entry.getKey(), springNum, coverageMap);
     }
   }
 
@@ -190,9 +202,11 @@ public class Jenkins {
     String mdBackendUrl = "masterdata-service/";
     String regBackendUrl = "regulation-service/";
     String docLibBackendUrl = "document-service-lib/";
+    String mdClientLibBackendUrl = "masterdata-client/";
     backendMap.put(MDBackendSheetName, mdBackendUrl);
     backendMap.put(regBackendSheetName, regBackendUrl);
     backendMap.put(docLibBackendSheetName, docLibBackendUrl);
+    backendMap.put(mdClientLibBackendSheetName, mdClientLibBackendUrl);
     return backendMap;
   }
 
@@ -205,18 +219,27 @@ public class Jenkins {
     } catch (URISyntaxException e) {
       e.printStackTrace();
     }
+    JobWithDetails job;
+    JacocoCoverageReport report;
+    String lastCompletedBuildDev = "job/dev/lastSuccessfulBuild/jacoco/";
+    String lastCompletedBuildMaster = "job/master/lastSuccessfulBuild/jacoco/";
     try {
-      JobWithDetails job = jenkins.getJobs().get("dev").details();
-      Build lastCompletedBuild = job.getLastCompletedBuild();
-      JacocoCoverageReport report = lastCompletedBuild.getClient()
-          .get("job/dev/lastCompletedBuild/jacoco/", JacocoCoverageReport.class);
+      if (jenkins.getJobs().get("dev") != null) {
+        job = jenkins.getJobs().get("dev").details();
+        report = job.getLastCompletedBuild().getClient()
+            .get(lastCompletedBuildDev, JacocoCoverageReport.class);
+      } else {//library only have master branch
+        job = jenkins.getJobs().get("master").details();
+        report = job.getLastCompletedBuild().getClient()
+            .get(lastCompletedBuildMaster, JacocoCoverageReport.class);
+      }
       coverageMap
           .put(0, numberFormat.format(0.01 * report.getInstructionCoverage().getPercentageFloat()));
       coverageMap.put(1, numberFormat.format(0.01 * report.getBranchCoverage().getPercentage()));
       coverageMap
           .put(2, numberFormat.format(0.01 * report.getComplexityScore().getPercentageFloat()));
       coverageMap.put(3, numberFormat.format(0.01 * report.getLineCoverage().getPercentageFloat()));
-      // no method coverage API
+      // no method coverage API, so still use line coverage
       coverageMap.put(4, numberFormat.format(0.01 * report.getLineCoverage().getPercentageFloat()));
       coverageMap
           .put(5, numberFormat.format(0.01 * report.getClassCoverage().getPercentageFloat()));
@@ -227,12 +250,12 @@ public class Jenkins {
   }
 
   private static void writeExcel(Workbook workbook, String sheetName, int sprintNum,
-      Map<Integer, String> coverageMap) throws IOException {
+      Map<Integer, String> coverageMap) {
     String sprint = "Sprint " + sprintNum;
     Sheet sheet = workbook.getSheet(sheetName);
     int lastRowCount = sheet.getLastRowNum();
     int cellNum = sheet.getRow(lastRowCount).getLastCellNum();
-    // if current sprint hasn't been writen to sheet
+    // if current sprint hasn't been written to sheet
     if (!sheet.getRow(lastRowCount).getCell(0).getStringCellValue().trim().equals(sprint.trim())) {
       Row row = sheet.createRow(++lastRowCount);
       CellStyle cellStyle = workbook.createCellStyle();
